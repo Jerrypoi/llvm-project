@@ -174,6 +174,7 @@ bool SFI::isTriviallySafe(Value *Ptr, Type *MemType, const DataLayout &DL) {
 
   uint64_t AllocTypeSize = DL.getTypeAllocSize(AllocatedType);
   uint64_t MemTypeSize = DL.getTypeStoreSize(MemType);
+  outs() << "Accessing pointer " << (AllocTypeSize >= MemTypeSize) << "\n";
   return (AllocTypeSize >= MemTypeSize);
 }
 
