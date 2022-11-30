@@ -24,6 +24,8 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/CommandLine.h"
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 //#include "llvm/Target/TargetData.h"
 #include "llvm/IR/AbstractCallSite.h"
 #include "llvm/IR/DataLayout.h"
@@ -39,13 +41,13 @@ STATISTIC(LSChecks, "Load/Store Instrumentation Added");
 static llvm::cl::opt<bool>
     DoLoadChecks("enable-sfi-loadchecks",
                  llvm::cl::desc("Add SFI checks to loads"),
-                 llvm::cl::init(false));
+                 llvm::cl::init(true));
 
 /* Command line option for enabling SVA Memory checks */
 static llvm::cl::opt<bool>
     DoSVAChecks("enable-sfi-svachecks",
                 llvm::cl::desc("Add special SFI checks for SVA Memory"),
-                llvm::cl::init(false));
+                llvm::cl::init(true));
 
 /* Command line option for enabling SVA Memory checks */
 static llvm::cl::opt<bool>
@@ -563,3 +565,12 @@ bool SFI::runOnFunction(Function &F) {
 namespace llvm {
 FunctionPass *createSFIPass(void) { return new SFI(); }
 } // namespace llvm
+
+using legacy::PassManagerBase;
+static void registerMyPass(const PassManagerBuilder &,
+                           PassManagerBase &PM) {
+  PM.add(new SFI());
+}
+static RegisterStandardPasses
+    RegisterMyPass(PassManagerBuilder::EP_EarlyAsPossible,
+                   registerMyPass);
